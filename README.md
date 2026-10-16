@@ -11,8 +11,10 @@ Unlike conventional download managers that divide a file into fixed equal slices
 - Downloads begin with segment 0 spanning `[0 .. file_size - 1]`.
 - As concurrency slots become available (up to configured connection cap, e.g., 8–32), IDM scans active segments and finds the one with the **largest remaining un-downloaded byte count**.
 - The segment is bisected at its midpoint:
-  $$\text{mid} = \text{current\_pos} + \frac{\text{remaining}}{2}$$
-- Segment $A$ retains $[ \text{start\_pos} .. \text{mid} - 1 ]$, while the newly spawned segment $B$ takes $[ \text{mid} .. \text{end\_pos} ]$.
+  ```text
+  mid = current_pos + (remaining / 2)
+  ```
+- Segment `A` retains `[start_pos .. mid - 1]`, while the newly spawned segment `B` takes `[mid .. end_pos]`.
 - In-flight byte clamping ensures that even when a division happens while packets are on the wire, the active socket terminates gracefully at the new boundary without data corruption.
 
 ### 2. 16-Byte Chunk Linked-List (`ChList`) Binary Format
