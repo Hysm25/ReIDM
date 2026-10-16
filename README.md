@@ -71,7 +71,32 @@ ReIDM matches IDM's official command line switches:
 | N/A | `--daemon` | Launch WebSocket listener on `ws://127.0.0.1:1001` |
 | N/A | `--native-messaging` | Run as `com.tonec.idm` WebExtension host |
 | N/A | `--list-tasks` | List paused / saved download sessions |
+| N/A | `--gui` | Launch native graphical user interface (default if no args) |
 | N/A | `--install-browser-integration` | Auto-install manifests into Chrome/Firefox/Edge |
+
+---
+
+## Graphical User Interface (GUI)
+
+ReIDM features an authentic recreation of Internet Download Manager's classic Win32 interface implemented natively using `eframe` and `egui`:
+
+- **Main Window & Toolbar:** Faithful replication of IDM's layout, classic Windows XP/7 palette (`#ECE9D8`, `#316AC5`), and 12 toolbar buttons (*Add URL*, *Resume*, *Stop*, *Stop All*, *Delete*, *Delete Completed*, *Options*, *Scheduler*, *Start Queue*, *Stop Queue*, *Grabber*, *Tell a Friend*) using original IDM toolbar icons.
+- **Category Sidebar & Downloads Table:** Left-hand tree navigation with original category icons (*All Downloads*, *Compressed*, *Documents*, *Music*, *Programs*, *Video*) with live item counters, plus a multi-column download table showing File Name, Size, Status, Time Left, Transfer Rate, and Last Try Date.
+- **Segmented Dynamic Progress Visualizer:** Pixel-accurate recreation of IDM's iconic progress indicator featuring cyan progress bars (`#00E5FF`) and pink vertical markers (`#FF1493`) dynamically showing in-half chunk bisecting and individual connection throughput.
+- **IDM Win32 Dialogs:**
+  - *Add URL* (Dialog 148): URL input, clipboard auto-paste, and optional authentication credentials.
+  - *Download File Info* (Dialog 130): HTTP HEAD probe, file size inspection, category selector, and custom save directory.
+  - *Download Progress* (Dialog 103/363): Real-time speed calculations, multi-connection segment visualizer, resume capability, and auto-shutdown controls.
+  - *Download Complete* (Dialog 286): Direct "Open" and "Open Folder" actions.
+  - *Configuration / Options* (Dialog 139): Max connection limits (up to 32), speed limiter toggles, and default directories.
+  - *Scheduler* (Dialog 308): Timed start/stop queues and periodic synchronization.
+
+To launch the GUI:
+```bash
+reidm --gui
+# or simply run without arguments:
+reidm
+```
 
 ---
 

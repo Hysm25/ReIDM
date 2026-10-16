@@ -68,4 +68,8 @@ pub struct CliArgs {
     /// Install native messaging host manifests into Chrome, Edge, and Firefox configuration paths
     #[arg(long = "install-browser-integration")]
     pub install_browser_integration: bool,
+
+    /// Launch graphical user interface
+    #[arg(long = "gui")]
+    pub gui: bool,
 }

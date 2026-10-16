@@ -265,7 +265,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .await;
     }
 
-    println!("ReIDM: No download URL or queue action provided. Run `reidm --help` for usage.");
+    // If no CLI action is specified or --gui is requested, launch the IDM GUI
+    println!("Launching ReIDM Graphical User Interface...");
+    run_gui(config)?;
+    Ok(())
+}
+
+fn run_gui(config: Config) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let handle = tokio::runtime::Handle::current();
+
+    let native_options = eframe::NativeOptions {
+        viewport: eframe::egui::ViewportBuilder::default()
+            .with_title("Internet Download Manager 6.43")
+            .with_inner_size([900.0, 560.0])
+            .with_min_inner_size([680.0, 420.0]),
+        ..Default::default()
+    };
+
+    eframe::run_native(
+        "Internet Download Manager 6.43",
+        native_options,
+        Box::new(move |cc| Ok(Box::new(ui::ReIdmApp::new(cc, config, handle)))),
+    )
+    .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?;
+
     Ok(())
 }
 
