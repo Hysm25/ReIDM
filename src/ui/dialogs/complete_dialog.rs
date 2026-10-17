@@ -4,6 +4,7 @@ use eframe::egui::{self, Align2, Button, Vec2, Window};
 pub struct DownloadCompleteDialog {
     pub is_open: bool,
     pub item: Option<DownloadItem>,
+    pub dont_show_again: bool,
 }
 
 impl Default for DownloadCompleteDialog {
@@ -11,6 +12,7 @@ impl Default for DownloadCompleteDialog {
         Self {
             is_open: false,
             item: None,
+            dont_show_again: false,
         }
     }
 }
@@ -38,9 +40,10 @@ impl DownloadCompleteDialog {
             .show(ctx, |ui| {
                 ui.add_space(6.0);
                 ui.horizontal(|ui| {
-                    ui.label("📁");
+                    let icon = egui::include_image!("../../../assets/idm_gui/dialogs/group_276_32x32.png");
+                    ui.add(egui::Image::new(icon).fit_to_exact_size(Vec2::new(32.0, 32.0)));
+                    ui.add_space(8.0);
                     ui.vertical(|ui| {
-                        ui.heading("Download complete");
                         ui.label(format!(
                             "Downloaded {:.2} MB ({} Bytes)",
                             item.file_size as f64 / 1_048_576.0,
@@ -80,6 +83,9 @@ impl DownloadCompleteDialog {
                         }
                     });
                 });
+
+                ui.add_space(4.0);
+                ui.checkbox(&mut self.dont_show_again, "Don't show this dialog again");
             });
 
         action

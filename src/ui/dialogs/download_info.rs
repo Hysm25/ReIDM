@@ -10,6 +10,7 @@ pub struct DownloadInfoDialog {
     pub file_size: u64,
     pub resumable: bool,
     pub description: String,
+    pub remember_path: bool,
 }
 
 impl Default for DownloadInfoDialog {
@@ -23,6 +24,7 @@ impl Default for DownloadInfoDialog {
             file_size: 0,
             resumable: true,
             description: String::new(),
+            remember_path: true,
         }
     }
 }
@@ -70,19 +72,25 @@ impl DownloadInfoDialog {
                                 ui.selectable_value(&mut self.category, cat.to_string(), *cat);
                             }
                         });
+                    let _ = ui.button("+");
                 });
 
                 ui.add_space(6.0);
 
                 // Save As
                 ui.horizontal(|ui| {
-                    ui.label("File Name: ");
-                    ui.add_sized([220.0, 20.0], TextEdit::singleline(&mut self.file_name));
-                    ui.label("In Folder:");
+                    ui.label("Save As:    ");
                     let mut path_str = self.save_path.to_string_lossy().to_string();
-                    if ui.add_sized([120.0, 20.0], TextEdit::singleline(&mut path_str)).changed() {
-                        self.save_path = PathBuf::from(path_str);
-                    }
+                    ui.add_sized([ui.available_width() - 40.0, 20.0], TextEdit::singleline(&mut path_str));
+                    self.save_path = PathBuf::from(path_str);
+                    let _ = ui.button("...");
+                });
+
+                ui.add_space(4.0);
+                ui.horizontal(|ui| {
+                    ui.add_space(62.0);
+                    let remember_label = format!("Remember this path for \"{}\" category", self.category);
+                    ui.checkbox(&mut self.remember_path, remember_label);
                 });
 
                 ui.add_space(6.0);
@@ -115,7 +123,7 @@ impl DownloadInfoDialog {
                 ui.separator();
                 ui.add_space(8.0);
 
-                // Bottom Buttons: Start Download | Download Later | Cancel
+                // Bottom Buttons matching Dialog 130: Download Later (1004) | Start Download (1006) | Cancel (2)
                 ui.horizontal(|ui| {
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         if ui.add_sized([75.0, 26.0], Button::new("Cancel")).clicked() {
@@ -123,14 +131,14 @@ impl DownloadInfoDialog {
                             action = Some(DownloadInfoAction::Cancel);
                         }
 
-                        if ui.add_sized([110.0, 26.0], Button::new("Download Later")).clicked() {
-                            self.is_open = false;
-                            action = Some(DownloadInfoAction::DownloadLater);
-                        }
-
                         if ui.add_sized([120.0, 26.0], Button::new("Start Download")).clicked() {
                             self.is_open = false;
                             action = Some(DownloadInfoAction::StartDownload);
+                        }
+
+                        if ui.add_sized([115.0, 26.0], Button::new("Download Later")).clicked() {
+                            self.is_open = false;
+                            action = Some(DownloadInfoAction::DownloadLater);
                         }
                     });
                 });

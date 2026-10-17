@@ -28,7 +28,7 @@ impl AddUrlDialog {
 
         let mut confirmed_url = None;
 
-        Window::new("Enter new URL to download")
+        Window::new("Enter new address to download")
             .anchor(Align2::CENTER_CENTER, Vec2::ZERO)
             .collapsible(false)
             .resizable(false)
@@ -39,9 +39,9 @@ impl AddUrlDialog {
                     // Left main section
                     ui.vertical(|ui| {
                         ui.horizontal(|ui| {
-                            ui.label("URL: ");
+                            ui.label("Address");
                             ui.add_sized(
-                                [320.0, 22.0],
+                                [310.0, 22.0],
                                 TextEdit::singleline(&mut self.url_input)
                                     .hint_text("http:// or https:// URL"),
                             );

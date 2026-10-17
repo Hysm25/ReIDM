@@ -271,14 +271,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Ok(())
 }
 
+fn load_app_icon() -> Option<eframe::egui::IconData> {
+    let bytes = include_bytes!("../assets/idm_gui/dialogs/group_128_32x32.png");
+    let img = image::load_from_memory(bytes).ok()?.into_rgba8();
+    let (width, height) = img.dimensions();
+    Some(eframe::egui::IconData {
+        rgba: img.into_raw(),
+        width,
+        height,
+    })
+}
+
 fn run_gui(config: Config) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let handle = tokio::runtime::Handle::current();
 
+    let mut viewport = eframe::egui::ViewportBuilder::default()
+        .with_title("Internet Download Manager 6.43")
+        .with_inner_size([900.0, 560.0])
+        .with_min_inner_size([680.0, 420.0]);
+
+    if let Some(icon) = load_app_icon() {
+        viewport = viewport.with_icon(icon);
+    }
+
     let native_options = eframe::NativeOptions {
-        viewport: eframe::egui::ViewportBuilder::default()
-            .with_title("Internet Download Manager 6.43")
-            .with_inner_size([900.0, 560.0])
-            .with_min_inner_size([680.0, 420.0]),
+        viewport,
         ..Default::default()
     };
 
