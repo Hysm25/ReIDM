@@ -28,6 +28,7 @@ impl RateLimiter {
         }
     }
 
+    #[allow(dead_code)]
     pub fn set_limit(&self, bytes_per_sec: Option<u64>) {
         self.bytes_per_sec
             .store(bytes_per_sec.unwrap_or(0), Ordering::Relaxed);

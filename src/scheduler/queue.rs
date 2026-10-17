@@ -4,6 +4,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct QueueConfig {
     pub name: String,
@@ -23,6 +24,7 @@ impl Default for QueueConfig {
     }
 }
 
+#[allow(dead_code)]
 pub struct QueueManager {
     config: Arc<QueueConfig>,
     pending: Arc<Mutex<VecDeque<DownloadItem>>>,
@@ -31,6 +33,7 @@ pub struct QueueManager {
     is_running: Arc<AtomicBool>,
 }
 
+#[allow(dead_code)]
 impl QueueManager {
     pub fn new(config: QueueConfig) -> Self {
         Self {

@@ -33,9 +33,19 @@ impl<'a> Widget for SegmentVisualizer<'a> {
         if ui.is_rect_visible(rect) {
             let painter = ui.painter();
 
-            // 1. Sunken dark background
+            // 1. Sunken white background container with classic 3D border
             painter.rect_filled(rect, 0.0, IdmTheme::SEGMENT_BG);
             painter.rect_stroke(rect, 0.0, Stroke::new(1.0_f32, IdmTheme::WIN_BORDER));
+
+            // Top and left dark inset lines for classic Win32 sunken border
+            painter.line_segment(
+                [rect.left_top(), rect.right_top()],
+                Stroke::new(1.0_f32, IdmTheme::WIN_DARK),
+            );
+            painter.line_segment(
+                [rect.left_top(), rect.left_bottom()],
+                Stroke::new(1.0_f32, IdmTheme::WIN_DARK),
+            );
 
             if self.total_bytes > 0 {
                 let total = self.total_bytes as f32;

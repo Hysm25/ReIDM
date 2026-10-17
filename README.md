@@ -41,10 +41,19 @@ Files are automatically routed into standard IDM category subdirectories based o
 - **Video:** `.mp4`, `.mkv`, `.avi`, `.flv`, `.mov`, `.wmv`, `.webm`, `.ts`, `.m3u8`
 - **Filename Collision:** Follows `name (1).ext`, `name (2).ext` numbering scheme.
 
-### 5. Browser Extension Integration
-ReIDM provides 100% wire-compatible integration with official IDM browser extensions (Chrome, Edge, Firefox, Brave):
-- **WebExtension Native Messaging (`com.tonec.idm`):** Stdio 32-bit length-prefixed JSON protocol communicating with `reidm --native-messaging`.
-- **WebSocket Daemon (`ws://127.0.0.1:1001`):** Subprotocol `plugin.v3.internetdownloadmanager.com` handling download interception frames (`MSG#seq#type#action...`).
+### 5. Browser Extension Integration & Wire Protocol
+ReIDM provides 100% wire-compatible integration with official IDM browser extensions (Chrome, Edge, Firefox, Brave) reverse-engineered directly from `IDMGCExt.crx` and `IDMMsgHost.exe`:
+- **Unified Wire Framing:** Both WebSocket (`ws://127.0.0.1:1001/?cid=0`) and WebExtension Native Messaging (`com.tonec.idm`) communicate via the IDM wire protocol:
+  ```text
+  MSG#<seq>#<type>#<action>#<flags>[:arg1:arg2...][,key=val][,key=len:val];
+  ```
+- **Extension Handshake & Activation Gate:**
+  1. Extension connects and sends Handshake (Type 2, Action 5, Flags 1024) containing browser name (Key 112) and extension version (Key 113).
+  2. ReIDM responds with Protocol Acknowledgment (Type 3) setting protocol version `113`, DPI `96`, and Zoom `100`.
+  3. ReIDM sends Configuration Update (Type 4) supplying the intercepted file extension regex (`ZIP|RAR|EXE...`). This unlocks extension listener registration (`Bb(this)`), activating Chrome download API hooks (`downloads.onCreated`, `downloads.onDeterminingFilename`).
+- **Download Takeover Protocol:**
+  - Type 13 (Browser Download Hook): When Chrome intercepts a download, it sends Type 13 with URL (Key 6), Filename (Key 4), and Cookies/UA. ReIDM responds with `MSG#<seq>#13#1#0:<id>:3;`, causing Chrome to cancel its native download while ReIDM initiates accelerated multi-connection retrieval.
+  - Type 14 (Direct / Context Menu): Direct user trigger with URL, Referrer (Key 50), Cookie (Key 51), and User-Agent (Key 54).
 
 ### 6. Streaming Protocol Support
 - **HLS (.m3u8):** Full parsing of EXT-X-TARGETDURATION, EXTINF, and sequential cryptographic segment stitching.
@@ -78,16 +87,20 @@ ReIDM matches IDM's official command line switches:
 
 ## Graphical User Interface (GUI)
 
-ReIDM features an authentic recreation of Internet Download Manager's classic Win32 interface implemented natively using `eframe` and `egui`:
+ReIDM features an authentic recreation of Internet Download Manager's classic Win32 interface implemented natively using `eframe` and `egui`, verified against official IDM documentation and binary resources:
 
-- **Main Window & Toolbar:** Faithful replication of IDM's layout, classic Windows XP/7 palette (`#ECE9D8`, `#316AC5`), and 12 toolbar buttons (*Add URL*, *Resume*, *Stop*, *Stop All*, *Delete*, *Delete Completed*, *Options*, *Scheduler*, *Start Queue*, *Stop Queue*, *Grabber*, *Tell a Friend*) using original IDM toolbar icons.
-- **Category Sidebar & Downloads Table:** Left-hand tree navigation with original category icons (*All Downloads*, *Compressed*, *Documents*, *Music*, *Programs*, *Video*) with live item counters, plus a multi-column download table showing File Name, Size, Status, Time Left, Transfer Rate, and Last Try Date.
-- **Segmented Dynamic Progress Visualizer:** Pixel-accurate recreation of IDM's iconic progress indicator featuring cyan progress bars (`#00E5FF`) and pink vertical markers (`#FF1493`) dynamically showing in-half chunk bisecting and individual connection throughput.
+- **Main Window & Toolbar:** Faithful replication of IDM's layout, classic Windows palette (`#ECE9D8`, `#316AC5`), and 12 toolbar buttons (*Add URL*, *Resume*, *Stop*, *Stop All*, *Delete*, *Delete Completed*, *Options*, *Scheduler*, *Start Queue*, *Stop Queue*, *Grabber*, *Tell a Friend*) using original IDM toolbar icons.
+- **Category Sidebar & Downloads Grid:** Left-hand tree navigation with original category icons (*All Downloads*, *Compressed*, *Documents*, *Music*, *Programs*, *Video*) with live item counters, plus a multi-column download table showing `Q` (Queue indicator), File Name, Size, Status, Time Left, Transfer Rate, and Last Try Date.
+- **Segmented Dynamic Progress Visualizer:** Pixel-accurate recreation of IDM's iconic progress indicator verified against original IDM screenshots:
+  - Clean white container background (`#FFFFFF`) with 3D sunken inset border (`#808080` / `#FFFFFF`).
+  - Pure saturated blue download blocks (`#0000FF`).
+  - Pure magenta boundary markers (`#FF00FF`) dynamically displaying in-half bisecting lines and active thread boundaries.
+  - Classic Win32 connection table (`N.`, `Downloaded`, `Info`: *Receiving data...*, *Connecting...*, *Complete*).
 - **IDM Win32 Dialogs:**
-  - *Add URL* (Dialog 148): URL input, clipboard auto-paste, and optional authentication credentials.
+  - *Add URL* (Dialog 148): URL input, clipboard auto-paste, optional authorization, and right-column stacked OK / Cancel buttons.
   - *Download File Info* (Dialog 130): HTTP HEAD probe, file size inspection, category selector, and custom save directory.
   - *Download Progress* (Dialog 103/363): Real-time speed calculations, multi-connection segment visualizer, resume capability, and auto-shutdown controls.
-  - *Download Complete* (Dialog 286): Direct "Open" and "Open Folder" actions.
+  - *Download Complete* (Dialog 286): Direct "Open", "Open with...", and "Open folder" actions.
   - *Configuration / Options* (Dialog 139): Max connection limits (up to 32), speed limiter toggles, and default directories.
   - *Scheduler* (Dialog 308): Timed start/stop queues and periodic synchronization.
 

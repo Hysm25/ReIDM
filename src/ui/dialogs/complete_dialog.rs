@@ -34,35 +34,49 @@ impl DownloadCompleteDialog {
             .anchor(Align2::CENTER_CENTER, Vec2::ZERO)
             .collapsible(false)
             .resizable(false)
-            .default_width(400.0)
+            .default_width(420.0)
             .show(ctx, |ui| {
                 ui.add_space(6.0);
                 ui.horizontal(|ui| {
                     ui.label("📁");
                     ui.vertical(|ui| {
-                        ui.strong(&item.file_name);
-                        ui.label(format!("Size: {:.2} MB", item.file_size as f64 / 1_048_576.0));
-                        ui.label(format!("Saved to: {}", item.final_destination().display()));
+                        ui.heading("Download complete");
+                        ui.label(format!(
+                            "Downloaded {:.2} MB ({} Bytes)",
+                            item.file_size as f64 / 1_048_576.0,
+                            item.file_size
+                        ));
                     });
                 });
 
-                ui.add_space(12.0);
+                ui.add_space(8.0);
+                ui.label("Address");
+                let mut url = item.url.clone();
+                ui.add_sized([ui.available_width(), 20.0], egui::TextEdit::singleline(&mut url));
+
+                ui.add_space(4.0);
+                ui.label("The file saved as");
+                let mut saved_as = item.final_destination().display().to_string();
+                ui.add_sized([ui.available_width(), 20.0], egui::TextEdit::singleline(&mut saved_as));
+
+                ui.add_space(10.0);
                 ui.separator();
                 ui.add_space(6.0);
 
                 ui.horizontal(|ui| {
+                    if ui.add_sized([75.0, 24.0], Button::new("Open")).clicked() {
+                        action = Some(CompleteDialogAction::Open);
+                    }
+                    if ui.add_sized([85.0, 24.0], Button::new("Open with...")).clicked() {
+                        action = Some(CompleteDialogAction::Open);
+                    }
+                    if ui.add_sized([85.0, 24.0], Button::new("Open folder")).clicked() {
+                        action = Some(CompleteDialogAction::OpenFolder);
+                    }
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        if ui.add_sized([75.0, 24.0], Button::new("Close")).clicked() {
+                        if ui.add_sized([70.0, 24.0], Button::new("Close")).clicked() {
                             self.is_open = false;
                             action = Some(CompleteDialogAction::Close);
-                        }
-
-                        if ui.add_sized([90.0, 24.0], Button::new("Open folder")).clicked() {
-                            action = Some(CompleteDialogAction::OpenFolder);
-                        }
-
-                        if ui.add_sized([75.0, 24.0], Button::new("Open")).clicked() {
-                            action = Some(CompleteDialogAction::Open);
                         }
                     });
                 });

@@ -10,8 +10,6 @@ pub struct DownloadInfoDialog {
     pub file_size: u64,
     pub resumable: bool,
     pub description: String,
-    pub start_now: bool,
-    pub start_later: bool,
 }
 
 impl Default for DownloadInfoDialog {
@@ -25,8 +23,6 @@ impl Default for DownloadInfoDialog {
             file_size: 0,
             resumable: true,
             description: String::new(),
-            start_now: false,
-            start_later: false,
         }
     }
 }

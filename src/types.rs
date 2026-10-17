@@ -13,6 +13,7 @@ pub struct ChunkRecord {
     pub start_pos: u64,  // 64-bit starting byte offset
 }
 
+#[allow(dead_code)]
 impl ChunkRecord {
     pub const SIZE: usize = 16;
 

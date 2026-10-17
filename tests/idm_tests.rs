@@ -1,7 +1,5 @@
-use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use reidm::categories::{determine_category, resolve_destination, resolve_unique_filename};
+use reidm::categories::resolve_destination;
 use reidm::types::{ChunkRecord, DownloadItem, DownloadStatus, Segment};
-use std::io::Cursor;
 use std::path::{Path, PathBuf};
 
 #[test]
@@ -99,7 +97,7 @@ async fn test_pause_and_resume_state_reconciliation() {
     std::fs::write(&chunk0_path, vec![0xAA; 1024]).unwrap();
     std::fs::write(&chunk1_path, vec![0xBB; 512]).unwrap();
 
-    let mut item = DownloadItem {
+    let item = DownloadItem {
         id: 12345,
         url: "http://example.com/test_file.bin".to_string(),
         file_name: "test_file.bin".to_string(),
@@ -315,4 +313,52 @@ fn test_assembly_linear_stitching() {
     // Cleanup
     let _ = std::fs::remove_dir_all(&temp_root);
 }
+
+#[test]
+fn test_idm_extension_wire_protocol_handshake_and_interception() {
+    use reidm::browser::IdmMessage;
+
+    // 1. Handshake Message (Type 2, Action 5, Flags 1024) sent by IDM Chrome Extension
+    let handshake_raw = "MSG#1#2#5#1024:113:93:1031:0:16845059:0:15:3,112=6:Chrome,113=6:6.43.1;";
+    let handshake = IdmMessage::parse(handshake_raw).expect("Failed to parse handshake");
+    assert_eq!(handshake.seq, 1);
+    assert_eq!(handshake.msg_type, 2);
+    assert_eq!(handshake.action, 5);
+    assert_eq!(handshake.flags, 1024);
+    assert_eq!(handshake.positional_args[0], "113");
+    assert_eq!(handshake.key_values.get(&112).map(|s| s.as_str()), Some("Chrome"));
+    assert_eq!(handshake.key_values.get(&113).map(|s| s.as_str()), Some("6.43.1"));
+
+    // Verify ReIDM handshake response
+    let resp1 = IdmMessage::handshake_response(handshake.seq);
+    assert!(resp1.starts_with("MSG#1#3#0#0:113:"));
+    let resp2 = IdmMessage::config_update(handshake.seq + 1);
+    assert!(resp2.contains("MSG#2#4#0#0:"));
+    assert!(resp2.contains("ZIP|RAR|EXE"));
+
+    // 2. Direct Download Interception Message (Type 14) from extension
+    let type14_raw = "MSG#25#14#1#0:1,6=28:https://example.com/file.zip,50=19:https://example.com,51=14:sessionid=abcd,54=16:Chrome/120.0.0.0,100=8:file.zip;";
+    let type14 = IdmMessage::parse(type14_raw).expect("Failed to parse type 14 message");
+    assert_eq!(type14.seq, 25);
+    assert_eq!(type14.msg_type, 14);
+    assert_eq!(type14.key_values.get(&6).map(|s| s.as_str()), Some("https://example.com/file.zip"));
+    assert_eq!(type14.key_values.get(&50).map(|s| s.as_str()), Some("https://example.com"));
+    assert_eq!(type14.key_values.get(&51).map(|s| s.as_str()), Some("sessionid=abcd"));
+    assert_eq!(type14.key_values.get(&54).map(|s| s.as_str()), Some("Chrome/120.0.0.0"));
+    assert_eq!(type14.key_values.get(&100).map(|s| s.as_str()), Some("file.zip"));
+
+    // 3. Browser Download Hook Interception (Type 13) from downloads.onDeterminingFilename
+    let type13_raw = "MSG#42#13#1#129:999:0:1792189309:0:1:2,6=34:https://example.com/archive.tar.gz,4=14:archive.tar.gz,103=10485760;";
+    let type13 = IdmMessage::parse(type13_raw).expect("Failed to parse type 13 message");
+    assert_eq!(type13.seq, 42);
+    assert_eq!(type13.msg_type, 13);
+    assert_eq!(type13.positional_args[0], "999");
+    assert_eq!(type13.key_values.get(&6).map(|s| s.as_str()), Some("https://example.com/archive.tar.gz"));
+    assert_eq!(type13.key_values.get(&4).map(|s| s.as_str()), Some("archive.tar.gz"));
+
+    // Takeover command tells Chrome to cancel browser download
+    let takeover = IdmMessage::download_takeover(42, "999");
+    assert_eq!(takeover, "MSG#42#13#1#0:999:3;");
+}
+
 

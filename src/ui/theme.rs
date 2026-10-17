@@ -2,6 +2,7 @@ use eframe::egui::{self, Color32, Stroke, Vec2};
 
 pub struct IdmTheme;
 
+#[allow(dead_code)]
 impl IdmTheme {
     // Classic IDM palette
     pub const WIN_GRAY: Color32 = Color32::from_rgb(236, 233, 216);      // #ECE9D8
@@ -27,11 +28,11 @@ impl IdmTheme {
     pub const STATUS_PAUSED: Color32 = Color32::from_rgb(204, 102, 0);   // Orange
     pub const STATUS_ERROR: Color32 = Color32::from_rgb(204, 0, 0);      // Red
 
-    // Segmented progress visualizer colors
-    pub const SEGMENT_BG: Color32 = Color32::from_rgb(24, 24, 24);       // Dark sunken container
-    pub const SEGMENT_FILLED: Color32 = Color32::from_rgb(0, 229, 255);   // Cyan downloaded blocks
-    pub const SEGMENT_PINK_MARKER: Color32 = Color32::from_rgb(255, 20, 147); // Pink segment start marks
-    pub const PROGRESS_BAR_FILL: Color32 = Color32::from_rgb(16, 180, 60); // Classic Windows green
+    // Segmented progress visualizer colors (Verified from original IDM segment screenshots)
+    pub const SEGMENT_BG: Color32 = Color32::from_rgb(255, 255, 255);       // Pure white container (#FFFFFF)
+    pub const SEGMENT_FILLED: Color32 = Color32::from_rgb(0, 0, 255);        // Pure saturated blue (#0000FF)
+    pub const SEGMENT_PINK_MARKER: Color32 = Color32::from_rgb(255, 0, 255); // Pure magenta start line (#FF00FF)
+    pub const PROGRESS_BAR_FILL: Color32 = Color32::from_rgb(16, 180, 60);  // Classic Windows green
 
     /// Applies IDM visual style to egui context
     pub fn apply(ctx: &egui::Context) {

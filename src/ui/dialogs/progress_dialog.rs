@@ -224,24 +224,22 @@ impl ProgressDialog {
                                 .striped(true)
                                 .min_col_width(70.0)
                                 .show(ui, |ui| {
-                                    ui.strong("Conn #");
-                                    ui.strong("Status");
+                                    ui.strong("N.");
                                     ui.strong("Downloaded");
-                                    ui.strong("Range");
+                                    ui.strong("Info");
                                     ui.end_row();
 
                                     for seg in &segments {
-                                        ui.label(format!("Conn {}", seg.id + 1));
-                                        let seg_status = if seg.is_active {
-                                            "Downloading"
+                                        ui.label(format!("{}", seg.id));
+                                        ui.label(format!("{} KB", seg.downloaded / 1024));
+                                        let info = if seg.is_active {
+                                            "Receiving data..."
                                         } else if seg.current_pos > seg.end_pos {
                                             "Complete"
                                         } else {
-                                            "Idle"
+                                            "Connecting..."
                                         };
-                                        ui.label(seg_status);
-                                        ui.label(format!("{:.1} KB", seg.downloaded as f64 / 1024.0));
-                                        ui.label(format!("{}-{}", seg.start_pos, seg.end_pos));
+                                        ui.label(info);
                                         ui.end_row();
                                     }
                                 });

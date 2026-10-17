@@ -5,7 +5,9 @@ pub const DEFAULT_USER_AGENT: &str =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
 pub const DEFAULT_MAX_CONNECTIONS: usize = 8;
+#[allow(dead_code)]
 pub const MIN_CONNECTIONS: usize = 1;
+#[allow(dead_code)]
 pub const MAX_CONNECTIONS: usize = 32;
 
 pub const DEFAULT_MIN_SPLIT_SIZE: u64 = 256 * 1024; // 256 KB

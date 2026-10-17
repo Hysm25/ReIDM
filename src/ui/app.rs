@@ -498,6 +498,7 @@ impl eframe::App for ReIdmApp {
                         .show(ui, |ui| {
                             // Table Headers (Classic Win32 style)
                             ui.strong("File Name");
+                            ui.strong("Q");
                             ui.strong("Size");
                             ui.strong("Status");
                             ui.strong("Time Left");
@@ -527,6 +528,10 @@ impl eframe::App for ReIdmApp {
                                     self.progress_dialog.download_id = item.id;
                                     self.progress_dialog.is_open = true;
                                 }
+
+                                // Q (Queue indicator from screenshot s-1.png / main-w.png)
+                                let q_str = if item.status == DownloadStatus::Idle { "📁" } else { "" };
+                                ui.label(q_str);
 
                                 // Size
                                 let size_str = if total > 0 {

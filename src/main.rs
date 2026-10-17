@@ -442,8 +442,9 @@ async fn run_daemon_server(
 
         tokio::spawn(async move {
             if let Ok(probe) = cm.probe(&download.url, download.referer.as_deref(), download.cookies.as_deref()).await {
-                let (dest_dir, category) = categories::resolve_destination(&cfg.download_dir, &probe.file_name);
-                let unique_filename = categories::resolve_unique_filename(&dest_dir, &probe.file_name);
+                let raw_name = download.filename.as_deref().unwrap_or(&probe.file_name);
+                let (dest_dir, category) = categories::resolve_destination(&cfg.download_dir, raw_name);
+                let unique_filename = categories::resolve_unique_filename(&dest_dir, raw_name);
                 let download_id = chrono::Utc::now().timestamp_millis() as u64;
                 let task_dir = sm.get_task_dir(&unique_filename, download_id);
 

@@ -45,7 +45,7 @@ impl OptionsDialog {
 
         let mut action = None;
 
-        Window::new("Configuration / Options")
+        Window::new("Internet Download Manager Configuration")
             .anchor(Align2::CENTER_CENTER, Vec2::ZERO)
             .collapsible(false)
             .resizable(false)

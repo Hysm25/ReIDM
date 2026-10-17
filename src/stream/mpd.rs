@@ -7,14 +7,17 @@ use std::io::Write;
 use std::path::Path;
 use url::Url;
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct DashSegment {
     pub url: String,
     pub is_init: bool,
 }
 
+#[allow(dead_code)]
 pub struct MpdParser;
 
+#[allow(dead_code)]
 impl MpdParser {
     /// Parses an MPD XML manifest and generates segment URLs based on SegmentTemplate
     pub fn parse(xml_content: &str, base_url: &str) -> Result<Vec<DashSegment>, Box<dyn std::error::Error + Send + Sync>> {
